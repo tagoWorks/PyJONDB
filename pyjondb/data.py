@@ -2,107 +2,113 @@ import json
 import os
 import base64
 import hashlib
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import padding
+import logging
+from cryptography.fernet import Fernet, InvalidToken
 
-class encrypt:
+# logging.basicConfig(level=logging.DEBUG)
+
+class Encrypt:
+    @staticmethod
+    def generate_fernet_key(key):
+        # Generate Fernet key from the provided key
+        return base64.urlsafe_b64encode(hashlib.sha256(key.encode()).digest())
+
     def encrypt_json(self, json_data, key):
-        # Pad the key to be URL-safe
-        key = base64.urlsafe_b64encode(key.encode()).decode()
+        fernet_key = self.generate_fernet_key(key)
+        fernet = Fernet(fernet_key)
 
-        # Layer 1: JSON to bytes
+        # JSON to bytes
         json_bytes = json.dumps(json_data).encode("utf-8")
 
-        # Layer 2: Base64 encoding
-        base64_bytes = base64.b64encode(json_bytes)
+        # Fernet encryption
+        encrypted_bytes = fernet.encrypt(json_bytes)
+        logging.debug(f"Encrypted bytes: {encrypted_bytes}")
 
-        # Layer 3: SHA-256 hashing
-        sha256_hash = hashlib.sha256(base64_bytes).digest()
+        # Second layer of encryption
+        second_layer_encrypted_bytes = fernet.encrypt(encrypted_bytes)
+        logging.debug(f"Second layer encrypted bytes: {second_layer_encrypted_bytes}")
 
-        # Layer 4: Fernet encryption
-        fernet = Fernet(key)
-        encrypted_bytes = fernet.encrypt(sha256_hash)
+        # Convert to binary string
+        binary_string = ''.join(format(byte, '08b') for byte in second_layer_encrypted_bytes)
+        logging.debug(f"Binary string: {binary_string}")
 
-        # Add padding to ensure the encrypted data is a multiple of 16 bytes
-        padder = padding.PKCS7(128).padder()
-        padded_bytes = padder.update(encrypted_bytes) + padder.finalize()
+        return binary_string.encode('utf-8')
 
-        return padded_bytes
-    def export_to_ndb(self, encrypted_bytes, filename):
+    def export_to_ndb(self, binary_string, filename):
         with open(filename, "wb") as f:
-            f.write(encrypted_bytes)
+            f.write(binary_string)
 
-class decrypt:
+class Decrypt:
+    @staticmethod
+    def generate_fernet_key(key):
+        # Generate Fernet key from the provided key
+        return base64.urlsafe_b64encode(hashlib.sha256(key.encode()).digest())
+
     def import_from_ndb(self, filename):
         with open(filename, "rb") as f:
-            encrypted_bytes = f.read()
-        return encrypted_bytes
+            binary_string = f.read()
+        return binary_string.decode('utf-8')
 
-    def decrypt_json(self, encrypted_bytes, key):
-        # Remove padding
+    def decrypt_json(self, binary_string, key):
+        fernet_key = self.generate_fernet_key(key)
+        fernet = Fernet(fernet_key)
+
         try:
-            unpadder = padding.PKCS7(128).unpadder()
-            unpadded_bytes = unpadder.update(encrypted_bytes) + unpadder.finalize()
-        except ValueError:
-            # Invalid padding bytes
+            # Convert binary string to bytes
+            encrypted_bytes = int(binary_string, 2).to_bytes((len(binary_string) + 7) // 8, byteorder='big')
+
+            # Second layer decryption
+            decrypted_bytes_first_layer = fernet.decrypt(encrypted_bytes)
+            logging.debug(f"Decrypted bytes first layer: {decrypted_bytes_first_layer}")
+
+            # First layer decryption
+            decrypted_bytes = fernet.decrypt(decrypted_bytes_first_layer)
+            logging.debug(f"Decrypted bytes: {decrypted_bytes}")
+
+            # JSON to object
+            json_data = json.loads(decrypted_bytes.decode("utf-8"))
+
+        except (InvalidToken, ValueError) as e:
+            logging.error("Invalid Fernet key, corrupted data, or binary string conversion error")
             return None
-
-        # Layer 4: Fernet decryption
-        fernet = Fernet(key)
-        decrypted_bytes = fernet.decrypt(unpadded_bytes)
-        # Layer 3: SHA-256 hash verification
-        sha256_hash = decrypted_bytes
-
-        # Layer 2: Base64 decoding
-        base64_bytes = sha256_hash
-        json_bytes = base64.b64decode(base64_bytes)
-
-        # Layer 1: JSON to object
-        try:
-            json_data = json.loads(json_bytes.decode("utf-8"))
         except json.JSONDecodeError:
-            # Corrupted JSON data
+            logging.error("Corrupted JSON data")
             return None
 
         return json_data
-class data:
+
+class Data:
     def __init__(self, database_name, key):
         self.database_name = database_name
         self.database_path = f"./databases/{database_name}"
         if not os.path.exists(self.database_path):
             os.makedirs(self.database_path)
 
-        self.key_base64 = self._generate_key_base64(key)
-        self.fernet = Fernet(self.key_base64)
-
-    def _generate_key_base64(self, key):
-        # Pad the key to be URL-safe
-        key = base64.urlsafe_b64encode(key.encode()).decode()
-        return key
-    
+        self.key = key
+        self.encryptor = Encrypt()
+        self.decryptor = Decrypt()
 
     def create_collection(self, collection_name):
-        collection_path = f"{self.database_path}/{collection_name}.json"
+        collection_path = f"{self.database_path}/{collection_name}.ndb"
         if not os.path.exists(collection_path):
-            with open(collection_path, "w") as collection_file:
-                collection_file.write("[]")
+            with open(collection_path, "wb") as collection_file:
+                collection_file.write(b"0")
 
     def read_collection(self, collection_name):
-        global key
-        collection_path = f"{self.database_path}/{collection_name}.json"
-        with open(collection_path, "rb") as collection_file:  # Open the file in binary mode
-            encrypted_data = collection_file.read()
-            decrypted_data = decrypt().decrypt_json(encrypted_data, key)
-            if decrypted_data is None:
-                return []  # or raise an exception, depending on your requirements
-            return json.loads(decrypted_data)
+        collection_path = f"{self.database_path}/{collection_name}.ndb"
+        if not os.path.exists(collection_path):
+            return []
+
+        encrypted_data = self.decryptor.import_from_ndb(collection_path)
+        decrypted_data = self.decryptor.decrypt_json(encrypted_data, self.key)
+        if (decrypted_data is None) or (decrypted_data == ''):
+            return []  # or raise an exception, depending on your requirements
+        return decrypted_data
 
     def write_collection(self, collection_name, data):
-        global key
-        collection_path = f"{self.database_path}/{collection_name}.json"
-        with open(collection_path, "w") as collection_file:
-            encrypted_data = encrypt().encrypt_json(data, key)
-            encrypt().export_to_ndb(encrypted_data, collection_path)
+        collection_path = f"{self.database_path}/{collection_name}.ndb"
+        encrypted_data = self.encryptor.encrypt_json(data, self.key)
+        self.encryptor.export_to_ndb(encrypted_data, collection_path)
 
     def add_document(self, collection_name, document):
         collection = self.read_collection(collection_name)
