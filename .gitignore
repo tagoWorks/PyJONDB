@@ -1,2 +1,5 @@
 
 /pyjondb/__pycache__
+.DS_Store
+.gitattributes
+/pyjondb/.DS_Store
