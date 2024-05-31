@@ -3,3 +3,5 @@
 .DS_Store
 .gitattributes
 /pyjondb/.DS_Store
+BuildandPublish.bat
+setup.py
