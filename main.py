@@ -1,20 +1,15 @@
-import logging
-from pyjondb.data import Data
-
-logging.basicConfig(level=logging.DEBUG)
+import pyjondb
 
 def run_tests():
-    database_name = "testdb"
-    key = "mysecretkey"
+    database_name = "test"
+    key = "anotherkey"
     
     # Initialize the Data class
-    db = Data(database_name, key)
-    
+    db = pyjondb.database(database_name, key)
+    db.create()
     # 1. Add documents to a collection
     print("Adding documents...")
     db.add_document("users", {"name": "John", "age": 30})
-    db.add_document("users", {"name": "Jane", "age": 25})
-    db.add_document("users", {"name": "Doe", "age": 22})
 
     # 2. Read the entire collection
     print("Reading collection...")
