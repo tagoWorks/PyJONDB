@@ -1,19 +1,12 @@
-from pyjondb.data import Data as data
+from pyjondb.data import Data
 
-# Create a new database instance
-key = "testkey123"
-db = data("my_database", key)
-# Link the collections
-db.link_collections("users", "posts", "email", "author")
+db = Data("example_db", "your_secret_key")
 
-# Find a document in the collection
-query = {"field": "email", "value": "john@example.com"}
-user_documents = db.find_document("users", query)
-print("User documents found:", user_documents)
+query = {"age": 30}
+matching_documents = db.find_document("users", query)
+print("Matching documents:", matching_documents)
 
-# Read and print all documents from the collections
-users_collection = db.read_collection("users")
-print("All users:", users_collection)
-
-posts_collection = db.read_collection("posts")
-print("All posts:", posts_collection)
+# Complex query example
+complex_query = {"$or": [{"age": 25}, {"name": "Alice"}]}
+complex_matching_documents = db.find_document("users", complex_query)
+print("Complex matching documents:", complex_matching_documents)
