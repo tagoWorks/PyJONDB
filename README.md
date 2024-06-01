@@ -26,31 +26,42 @@ This package provides a lightweight, encrypted JSON-based database with support 
 ```sh
 pip install pyjondb
 ```
-### Creating a database
+### Create a user with admin role
+```python
+# Initialize authentication
+auth = session.start()
+auth.create_user('admin', 'adminpass', roles=['admin'])
+
+# Authenticate and get a session ID
+session_id = auth.authenticate('admin', 'adminpass')
+if not session_id:
+    raise PermissionError("Authentication failed")
+```
+### Initialize and create the database
 ```python
 # Initialize the database
 # The database function has optional values: 
 # pyjondb.database("database", "mypassword", debug=True/False, absolute=True/False)
-db = pyjondb.database("database", "mypassword")
+db = database.init("database", "mydatabasekey", auth)
 
 # Create the database
 # Note: you should only create the database if it doesn't already exist
-db.create()
+db.create(session_id)
 ```
 ### Writing data to the database
 ```python
-data = {
-    "name": "John",
-    "age": 30,
-    "email": "john@example.com"
-}
-db.write(data)
+# Create a collection
+db.create_collection('my_collection', session_id)
+
+# Add a document
+db.add_document('my_collection', {'name': 'example'}, session_id)
+
 ```
 
 ### Read the data
 ```python
-data = db.read()
-print(data)
+# Get all documents in a collection
+print(db.read_collection('my_collection', session_id))
 ```
 
 ### PyJONDB gets way more advanced than writing simple data. To learn more about collections, documents, aggregation, linking, and tree structures read the [docs](https://github.com/t-a-g-o/PyJONDB)
