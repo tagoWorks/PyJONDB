@@ -34,7 +34,7 @@ pip install pyjondb
 db = pyjondb.database("database", "mypassword")
 
 # Create the database
-# Note: you should only create the database if it doesnt already exist
+# Note: you should only create the database if it doesn't already exist
 db.create()
 ```
 ### Writing data to the database
@@ -53,7 +53,7 @@ data = db.read()
 print(data)
 ```
 
-### PyJONDB Gets way more advanced than writing simple data. To learn more about collections, documents, aggregation, linking, and tree structures read the [docs](https://github.com/t-a-g-o/PyJONDB)
+### PyJONDB gets way more advanced than writing simple data. To learn more about collections, documents, aggregation, linking, and tree structures read the [docs](https://github.com/t-a-g-o/PyJONDB)
 
 
 # Database Viewing Tool
