@@ -1,9 +1,11 @@
 import os
 import json
 import sys
-import pyjondb
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
+from pyjondb import database
+from pyjondb import session
+
 
 def decrypt_and_show():
     key = key_entry.get()
@@ -15,9 +17,11 @@ def decrypt_and_show():
         return
     db_name = os.path.splitext(os.path.basename(database_path))[0]
     print(db_name)
-    db = pyjondb.database(db_name, key, absolute=True)
+    auth = session.start()
+    session_id = auth.authenticate('pyjondb.viewer', 'pyjondbviewtool')
+    db = database.init(db_name, key, auth, absolute=True)
     try:
-        data = db.read()
+        data = db.read(session_id)
         show_data(data)
     except Exception as e:
         messagebox.showerror("Error", f"Failed to read the database: {e}")

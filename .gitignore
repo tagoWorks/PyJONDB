@@ -10,3 +10,5 @@ setup.py
 pyjondb.ico
 pypi.readme
 /PyJONDB.egg-info
+/database-viewer/src/build/PyJONDB Viewer/localpycs
+database-viewer/src/convert.bat
