@@ -5,3 +5,6 @@
 /pyjondb/.DS_Store
 BuildandPublish.bat
 setup.py
+/build
+/databases
+pyjondb.ico

@@ -58,7 +58,7 @@ class Decrypt:
 
 
 class database:
-    def __init__(self, database_name, key, debug=False):
+    def __init__(self, database_name, key, debug=False, absolute=False):
         """
         Initializes a new instance of the Database.
 
@@ -66,12 +66,17 @@ class database:
             - database_name (str): The name of the database.
             - key (str): The encryption key.
             - debug (bool, optional): Whether to enable debug mode. Defaults to False.
+            - absolute (bool, optional): Instead of checking a database directory, read from the current. Defaults to False.
         """
         self.database_name = database_name
         self.debug = debug
-        self.database_path = f"./databases/{database_name}.ndb"
-        if not os.path.exists("./databases"):
-            os.makedirs("./databases")
+        self.absolute = absolute
+        if absolute:
+            self.database_path = f"{database_name}.ndb"
+        else:
+            self.database_path = f"./databases/{database_name}.ndb"
+            if not os.path.exists("./databases"):
+                os.makedirs("./databases")
         self.key = key
         self.encryptor = Encrypt()
         self.decryptor = Decrypt()

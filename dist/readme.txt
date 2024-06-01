@@ -1,0 +1,1 @@
+For the viewer to properly work you needs to double click a .NDB file and run with this exe file
