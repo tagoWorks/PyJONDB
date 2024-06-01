@@ -8,3 +8,5 @@ setup.py
 /build
 /databases
 pyjondb.ico
+database-viewer/pypi.readme
+/PyJONDB.egg-info

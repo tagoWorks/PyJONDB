@@ -10,11 +10,9 @@ def decrypt_and_show():
     if not key:
         messagebox.showerror("Error", "Please enter the database key.")
         return
-    
     if not os.path.isfile(database_path):
         messagebox.showerror("Error", f"File {database_path} does not exist.")
         return
-
     db_name = os.path.splitext(os.path.basename(database_path))[0]
     print(db_name)
     db = pyjondb.database(db_name, key, absolute=True)
@@ -53,17 +51,15 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
-# Hide the main window initially
+
 root = tk.Tk()
 root.withdraw()
 root.title("PyJONDB Database File View Tool")
 root.iconbitmap(resource_path("pyjondb.ico"))
 
-# Padding configuration
 padx = 10
 pady = 10
 
-# Top frame for file selection and key entry
 top_frame = tk.Frame(root)
 top_frame.pack(pady=pady)
 
@@ -75,7 +71,6 @@ key_entry.grid(row=1, column=1, padx=padx, pady=pady)
 
 tk.Button(top_frame, text="View Data in file", command=decrypt_and_show, width=20, height=2).grid(row=2, column=0, columnspan=2, padx=padx, pady=pady)
 
-# Bottom frame for displaying data
 bottom_frame = tk.Frame(root)
 bottom_frame.pack(pady=pady)
 
@@ -83,6 +78,5 @@ text_area = scrolledtext.ScrolledText(bottom_frame, wrap=tk.WORD, width=80, heig
 text_area.pack(padx=padx, pady=pady)
 text_area.configure(state='disabled')
 
-# Check for file passed as argument
 root.after(0, on_open)
 root.mainloop()
