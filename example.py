@@ -2,8 +2,8 @@ from pyjondb import database
 from pyjondb import session
 
 # Initialize authentication
-auth = session.start(work_in_db_dir=False, support_view_tool=True)
-#auth.create_user('admin', 'adminpass', roles=['admin'])
+auth = session.start(work_in_db_dir=False)
+auth.create_user('admin', 'adminpass', roles=['admin'])
 
 # Authenticate and get a session ID
 session_id = auth.authenticate('admin', 'adminpass')

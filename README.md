@@ -66,13 +66,6 @@ print(db.read_collection('my_collection', session_id))
 
 ### PyJONDB gets way more advanced than writing simple data. To learn more about collections, documents, aggregation, linking, and tree structures read the [docs](https://github.com/t-a-g-o/PyJONDB)
 
-
-# Database Viewing Tool
-In the `database-viewer` folder there is an executable which you can run along with any PyJONDB database file (.ndb extension)
-
-#### Note: you cannot directly edit the database with the viewing tool
-
-
 # License & Contact 📃
 This project is published under the [MIT license](./LICENSE)
 

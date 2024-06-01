@@ -8,10 +8,11 @@
 #   `--'     .-'  /   `-----'  `-----' `--'  `--'`-------' `------'  
 #            `---'                                                   
 # 
-#                 made with <3 by tago | version 1.6
+#                 made with <3 by tago | version 2.0
 #
 #           learn more at https://github.com/tagoWorks/pyjondb
 #
+
 
 
 
@@ -25,7 +26,7 @@ import datetime
 databasepath = None
 
 class start:
-    def __init__(self, user_file='users.json', work_in_db_dir=True, session_timeout=3600, support_view_tool=False):
+    def __init__(self, user_file='users.json', work_in_db_dir=True, session_timeout=3600):
         """
         Initializes a new instance for the database handling.
 
@@ -33,25 +34,14 @@ class start:
             user_file (str, optional): The path to the user file. Defaults to 'users.json'.
             work_in_db_dir (bool, optional): Whether to work in the databases directory for the user data. Defaults to 'True'
             session_timeout (int, optional): The session timeout in seconds. Defaults to 3600.
-            support_view_tool (bool, optional): Whether to support the view tool. Defaults to 'False'. Set to false for production.
-              - Enabling the view tool support will create a PyJONDB user in your user file in order to view the database. This means
-                that anyone with the PyJONDB View Tool name and password can view your database.
         """
         global databasepath
         self.user_file = user_file
-        self.support_view_tool = support_view_tool
         self.work_in_db_dir = work_in_db_dir
         self.users = self.load_users()
         self.sessions = {}
         self.absolute = databasepath
         self.session_timeout = session_timeout
-        if self.support_view_tool == True:
-            hashed_password = self.hash_password("pyjondbviewtool")
-            self.users["pyjondb.viewtool"] = {
-                'password': hashed_password,
-                'roles': ["user"]
-            }
-            self.save_users()
 
     def load_users(self):
         """

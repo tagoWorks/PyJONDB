@@ -8,10 +8,12 @@
 #   `--'     .-'  /   `-----'  `-----' `--'  `--'`-------' `------'  
 #            `---'                                                   
 #   
-#                 made with <3 by tago | version 1.6
+#                 made with <3 by tago | version 2.0
 #
 #           learn more at https://github.com/tagoWorks/pyjondb
 #
+
+
 
 
 
