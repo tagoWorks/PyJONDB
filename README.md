@@ -17,7 +17,7 @@
    ![Website](https://img.shields.io/website?url=https%3A%2F%2Ftago.works%2F)
   </p>
 </div>
-<h2 align="center">Python JavaScript Object Notation Database <span style="font-size: 10px;">(without script since it sounds better)</span></h2>
+<h2 align="center">Python JavaScript Object Notation Database <sub><sup>(without script since it sounds better)</sup></sub></h2>
 
 This package provides a lightweight, encrypted JSON-based database with support for collections, document operations, and aggregation. It uses the cryptography library for encryption and decryption of data, ensuring secure storage of your sensitive information. The PyPI package includes docstrings for each function to make it easier to learn.
 
